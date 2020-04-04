@@ -1,6 +1,6 @@
 ﻿namespace ViewController
 {
-    partial class Form1
+    partial class Client_and_GUI
     {
         /// <summary>
         ///  Required designer variable.

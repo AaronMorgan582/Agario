@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace ViewController
 {
-    public partial class Form1 : Form
+    public partial class Client_and_GUI : Form
     {
-        public Form1()
+        public Client_and_GUI()
         {
             InitializeComponent();
         }
