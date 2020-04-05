@@ -42,7 +42,7 @@ namespace ViewController
             this.connect_button.Size = new System.Drawing.Size(100, 50);
             this.connect_button.Name = "Connect Button";
             this.connect_button.Text = "Connect";
-            //this.Connect_Button.Click += Connect;
+            this.connect_button.Click += Connect_To_Server;
 
 
             //Input Box for Player Name
@@ -116,6 +116,8 @@ namespace ViewController
             this.Controls.Add(server_label);
             this.Controls.Add(error_label);
             this.Controls.Add(title_label);
+
+            this.Paint += new PaintEventHandler(Draw_Scene);
         }
 
         #endregion
