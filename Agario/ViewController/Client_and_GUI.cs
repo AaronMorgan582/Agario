@@ -20,6 +20,7 @@ namespace ViewController
         private string player_name;
         private string server_name = "localhost";
         private Circle player_circle;
+        private Circle world_circle;
         public Client_and_GUI()
         {
             InitializeComponent();
@@ -44,27 +45,53 @@ namespace ViewController
             server_name = server_address_box?.Text;
             // * upon connection the code (in another thread) will execute the "Contact_Established" method.
             this.server = Networking.Connect_to_Server(Contact_Established, server_name);
+            connect_button.Visible = false;
+            player_name_box.Visible = false;
+            player_name_label.Visible = false;
+            server_address_box.Visible = false;
+            server_label.Visible = false;
+            title_label.Visible = false;
+
+            this.Paint += new PaintEventHandler(Draw_Scene);
         }
 
         private void Contact_Established(Preserved_Socket_State obj)
         {
             Debug.WriteLine("Contact with Server established!");
             obj.on_data_received_handler = Get_Player_Circle;
+
+
             Networking.Send(obj.socket, player_name);
             Networking.await_more_data(obj);  // * must "await_more_data" if you want to receive messages.
         }
 
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
+            string message = "{ \"loc\":{ \"X\":1768.0,\"Y\":320.0},\"argb_color\":-2445240,\"id\":0,\"belongs_to\":0,\"type\":0,\"Name\":\"Player\",\"Mass\":10.0}";
             // Do we deserialize here?
-            player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+            player_circle = JsonConvert.DeserializeObject<Circle>(message);
             Networking.await_more_data(obj);
+            obj.on_data_received_handler = Get_World_Information;
+        }
+
+        private void Get_World_Information(Preserved_Socket_State obj)
+        {
+            world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+            Networking.await_more_data(obj);
+            obj.on_data_received_handler = Get_World_Information;
         }
 
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
-            Brush brush = new SolidBrush(Color.FromArgb(240,30,70));
-            e.Graphics.FillEllipse(brush, new Rectangle(116,-1, 450,450));
+            this.Invalidate();
+            Brush brush = new SolidBrush(Color.FromArgb(240, 30, 70));
+            if (player_circle != null)
+            {
+                Rectangle circ_as_rect = new Rectangle(116, -1, (int)player_circle.Radius * 2, (int)player_circle.Radius * 2);
+                e.Graphics.FillEllipse(brush, circ_as_rect);
+            }
+            
+
 
         }
     }

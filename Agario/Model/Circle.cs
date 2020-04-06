@@ -53,5 +53,6 @@ namespace Model
             Console.WriteLine(testCircle);
         }
 
+        public double Radius { get => radius; }
     }
 }

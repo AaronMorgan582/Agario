@@ -117,7 +117,7 @@ namespace ViewController
             this.Controls.Add(error_label);
             this.Controls.Add(title_label);
 
-            this.Paint += new PaintEventHandler(Draw_Scene);
+            //this.Paint += new PaintEventHandler(Draw_Scene);
         }
 
         #endregion
