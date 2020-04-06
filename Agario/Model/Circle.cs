@@ -6,33 +6,51 @@ namespace Model
 {
     public class Circle
     {
+        public enum object_type {food, player, heartbeat, admin}
+
         [JsonProperty]
-        private int id_number;
+        private PointF loc;
+
         [JsonProperty]
-        private PointF position;
+        private int argb_color;
+
         [JsonProperty]
-        private Color circle_color;
+        private int id;
+
         [JsonProperty]
-        private string circle_name;
+        private int belongs_to;
+
         [JsonProperty]
-        private int mass;
+        private object_type type;
+
         [JsonProperty]
-        private object obj_type;
+        private string Name;
+
+        [JsonProperty]
+        private float Mass;
 
         private double radius;
 
-        //{"loc":{"X":1768.0,"Y":320.0},"argb_color":-2445240,"id":0,"belongs_to":0,"type":0,"Name":"","Mass":10.0}
-
-        //public Circle(PointF loc, Color argb_color, int id, int belongs_to, object type, string Name, int Mass)
-        public Circle(string loc, string argb_color, string id, string belongs_to, string type, string Name, string Mass)
+        public Circle(PointF loc, int argb_color, int id, int belongs_to, object_type type, string Name, float Mass)
         {
-            //this.position = loc;
-            //circle_color = argb_color;
-            //id_number = id;
-            //obj_type = type;
-            //circle_name = Name;
-            //this.mass = Mass;
-            //radius = (mass / (2 * Math.PI));
+            this.loc = loc;
+            this.argb_color = argb_color;
+            this.id = id;
+            this.belongs_to = belongs_to;
+            this.type = type;
+            this.Name = Name;
+            this.Mass = Mass;
+
+            radius = (Mass / (2 * Math.PI));
+        }
+
+        public static void Main(string[] args)
+        {
+            string message = "{ \"loc\":{ \"X\":1768.0,\"Y\":320.0},\"argb_color\":-2445240,\"id\":0,\"belongs_to\":0,\"type\":0,\"Name\":\"Player\",\"Mass\":10.0}";
+
+            Circle testCircle = JsonConvert.DeserializeObject<Circle>(message);
+
+            Console.WriteLine(testCircle);
         }
 
     }

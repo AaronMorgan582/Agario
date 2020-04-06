@@ -57,7 +57,8 @@ namespace ViewController
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
             // Do we deserialize here?
-            //player_circle = JsonConvert.SerializeObject(new Circle());
+            player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+            Networking.await_more_data(obj);
         }
 
         private void Draw_Scene(object sender, PaintEventArgs e)
