@@ -54,5 +54,7 @@ namespace Model
         }
 
         public double Radius { get => radius; }
+
+        public int CircleColor { get => argb_color; }
     }
 }
