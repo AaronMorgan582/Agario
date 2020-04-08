@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Model
 {
-    class World
+    public class World
     {
         protected const int HEIGHT = 5_000;
         protected int WIDTH = 5_000;

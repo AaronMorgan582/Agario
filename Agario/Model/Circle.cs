@@ -58,5 +58,7 @@ namespace Model
         public int CircleColor { get => argb_color; }
 
         public PointF Location { get => loc; }
+
+        public int ID { get => id; }
     }
 }

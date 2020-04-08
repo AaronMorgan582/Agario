@@ -52,6 +52,9 @@ namespace ViewController
             this.player_name_box.Name = "Player_Name_Textbox";
             this.player_name_box.Size = new System.Drawing.Size(100, 20);
             this.player_name_box.TabIndex = 2;
+
+            this.player_name_box.Text = "Player One"; // TODO: Remove this and Enabled (below) to allow user input.
+            this.player_name_box.Enabled = false;
             //this.player_name_box.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.player_name_box);
 
 
@@ -72,6 +75,9 @@ namespace ViewController
             this.server_address_box.Name = "Server_Address_Textbox";
             this.server_address_box.Size = new System.Drawing.Size(100, 20);
             this.server_address_box.TabIndex = 2;
+
+            this.server_address_box.Text = "localhost"; //TODO: Remove this and Enabled (below) to allow user input.
+            this.server_address_box.Enabled = false;
             //this.server_address_box.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.server_address_box);
 
 
@@ -118,7 +124,7 @@ namespace ViewController
             this.Controls.Add(error_label);
             this.Controls.Add(title_label);
 
-            //this.Paint += new PaintEventHandler(Draw_Scene);
+            this.Paint += new PaintEventHandler(Draw_Scene);
         }
 
         #endregion
