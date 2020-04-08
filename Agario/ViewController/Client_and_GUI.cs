@@ -74,14 +74,13 @@ namespace ViewController
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
             player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
-/*            Networking.await_more_data(obj);
-            obj.on_data_received_handler = Get_World_Information;*/
+            obj.on_data_received_handler = Get_World_Information;
         }
 
         private void Get_World_Information(Preserved_Socket_State obj)
         {
-            world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
             Networking.await_more_data(obj);
+            player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
             obj.on_data_received_handler = Get_World_Information;
         }
 
@@ -89,20 +88,30 @@ namespace ViewController
         {
 
             this.DoubleBuffered = true;
-
-            Brush brush = new SolidBrush(Color.FromArgb(240, 30, 70));
+            //int player_circle_location_x = (int) player_circle.Location.X;
+            //int player_circle_location_y = (int)player_circle.Location.Y;
 
             if (player_circle != null)
             {
-                Rectangle circ_as_rect = new Rectangle(116, -1, (int)player_circle.Radius * 2, (int)player_circle.Radius * 2);
-                e.Graphics.FillEllipse(brush, circ_as_rect);
+                int player_circle_color = player_circle.CircleColor;
+                Brush player_brush = new SolidBrush(Color.FromArgb(player_circle_color));
+                float tempx = player_circle.Location.X / 5000 * 1600;
+                float tempy = player_circle.Location.Y / 5000 * 900;
+                Rectangle circ_as_rect = new Rectangle((int)tempx, (int)tempy, (int)player_circle.Radius * 2, (int)player_circle.Radius * 2);
+                e.Graphics.FillEllipse(player_brush, circ_as_rect);
+                error_label.Text += $"{(int)tempx}, {(int)tempy} |";
             }
 
+            //if(world_circle != null)
+            //{
+                //int world_circle_color = world_circle.CircleColor;
+                //Brush world_brush = new SolidBrush(Color.FromArgb(world_circle_color));
+                //Rectangle circ_as_rect = new Rectangle((int)world_circle.Location.X, (int)world_circle.Location.Y, (int)world_circle.Radius * 2, (int)world_circle.Radius * 2);
+                //e.Graphics.FillEllipse(world_brush, circ_as_rect);
+                //error_label.Text += $"{(int)player_circle.Location.X}, {(int)player_circle.Location.Y} |";
+            //}
+
             this.Invalidate();
-
-
-
-
         }
     }
 }
