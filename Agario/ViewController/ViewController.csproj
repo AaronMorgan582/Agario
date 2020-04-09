@@ -7,7 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="3.1.3" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
@@ -16,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="FileLogger">
+      <HintPath>..\..\..\assignment-seven-logging-and-networking-anti-social-social-club\Networking_and_Logging\FileLogger\obj\Debug\netcoreapp3.1\FileLogger.dll</HintPath>
+    </Reference>
     <Reference Include="Networking">
       <HintPath>..\libs\Networking.dll</HintPath>
     </Reference>

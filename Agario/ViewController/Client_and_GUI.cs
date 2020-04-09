@@ -29,10 +29,14 @@ namespace ViewController
         private const int screen_height = 900;
 
         private bool connected = false;
-        private ILogger logger; //TODO: Need to implement a logger at some point.
+        private ILogger logger;
+        private World game_world;
 
-        public Client_and_GUI()
+        public Client_and_GUI(ILogger logger)
         {
+            this.logger = logger;
+            game_world = new World(logger);
+
             InitializeComponent();
         }
 
@@ -60,7 +64,7 @@ namespace ViewController
 
         private void Contact_Established(Preserved_Socket_State obj)
         {
-            Debug.WriteLine("Contact with Server established!");
+            logger.LogInformation("Contact with Server established!");
             obj.on_data_received_handler = Get_Player_Circle;
 
             Networking.Send(obj.socket, player_name);
@@ -77,7 +81,6 @@ namespace ViewController
                 circle_list.Add(player_circle);
             }
 
-
             Networking.await_more_data(obj);
             obj.on_data_received_handler = Get_World_Information;
         }
@@ -93,9 +96,9 @@ namespace ViewController
                 }
 
             }
-            catch (Exception e) //TODO: What to do when caught?
+            catch (Exception e)
             {
-                //logger.LogError("");
+                logger.LogError($"{e}");
             }
 
             Networking.await_more_data(obj);
@@ -104,7 +107,6 @@ namespace ViewController
 
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
-
             if (connected)
             {
                 float player_x = player_circle.Location.X / 5000 * 1600;
@@ -124,11 +126,9 @@ namespace ViewController
                 this.ClientSize = new System.Drawing.Size(screen_width, screen_height);
                 this.CenterToScreen();
 
-
                 username_label.Text = player_name;
                 username_label.Visible = true;
                 username_label.Location = new Point((int)player_circle.Location.X, (int)player_circle.Location.Y);
-
 
                 error_label.Location = new Point(25, 850);
 

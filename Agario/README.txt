@@ -18,11 +18,11 @@ Commit #:
             Expected Time to Complete: 25 hours.
 
                 Time spent on Analysis: 4.5 hours.
-                Time spent on Implementation: 4.5 hours.
+                Time spent on Implementation: 5 hours.
                 Time spent Debugging: 1.5 hours.
                 Time spent Testing: 1 hours.
 
-            Total Time: 11.5 hours.
+            Total Time: 12 hours.
 
     B) User Interface and Game Design Decisions
 

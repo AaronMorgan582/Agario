@@ -16,6 +16,7 @@ namespace Model
         public World(ILogger logger)
         {
             circle_list = new Dictionary<int, Circle>();
+            logger.LogInformation("List of Circles created.");
         }
     }
 }
