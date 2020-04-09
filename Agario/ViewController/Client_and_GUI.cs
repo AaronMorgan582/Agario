@@ -17,6 +17,7 @@ namespace ViewController
 {
     public partial class Client_and_GUI : Form
     {
+        public enum object_type { food, player, heartbeat, admin }
         private Preserved_Socket_State server;
         private string player_name;
         private string server_name = "localhost";
@@ -24,8 +25,8 @@ namespace ViewController
         private Circle world_circle;
         private List<Circle> circle_list = new List<Circle>();
 
-        private const int screen_height = 1600;
-        private const int screen_width = 900;
+        private const int screen_width = 1600;
+        private const int screen_height = 900;
 
         private bool connected = false;
         private ILogger logger; //TODO: Need to implement a logger at some point.
@@ -46,7 +47,7 @@ namespace ViewController
 
             Debug.WriteLine("Asking the network code to connect to the server.");
 
-            player_name = player_name_box?.Text;
+            player_name = player_name_box.Text;
             if (player_name is "")
             {
                 player_name = $"{new Random()}";
@@ -54,7 +55,7 @@ namespace ViewController
             server_name = server_address_box?.Text;
             // * upon connection the code (in another thread) will execute the "Contact_Established" method.
             this.server = Networking.Connect_to_Server(Contact_Established, server_name);
-           
+
         }
 
         private void Contact_Established(Preserved_Socket_State obj)
@@ -70,7 +71,7 @@ namespace ViewController
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
             player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
-            
+
             lock (circle_list)
             {
                 circle_list.Add(player_circle);
@@ -92,9 +93,9 @@ namespace ViewController
                 }
 
             }
-            catch(Exception e) //TODO: What to do when caught?
+            catch (Exception e) //TODO: What to do when caught?
             {
-
+                //logger.LogError("");
             }
 
             Networking.await_more_data(obj);
@@ -106,16 +107,28 @@ namespace ViewController
 
             if (connected)
             {
+                float player_x = player_circle.Location.X / 5000 * 1600;
+                float player_y = player_circle.Location.Y / 5000 * 900;
+
+                e.Graphics.TranslateTransform(100, 100);
+                e.Graphics.ScaleTransform(0.65f, 0.65f);
 
                 this.DoubleBuffered = true;
-                
+
                 connect_button.Visible = false;
                 player_name_box.Visible = false;
                 player_name_label.Visible = false;
                 server_address_box.Visible = false;
                 server_label.Visible = false;
                 title_label.Visible = false;
-                this.ClientSize = new System.Drawing.Size(screen_height, screen_width);
+                this.ClientSize = new System.Drawing.Size(screen_width, screen_height);
+                this.CenterToScreen();
+
+
+                username_label.Text = player_name;
+                username_label.Visible = true;
+                username_label.Location = new Point((int)player_circle.Location.X, (int)player_circle.Location.Y);
+
 
                 error_label.Location = new Point(25, 850);
 
@@ -137,7 +150,7 @@ namespace ViewController
                 }
 
                 this.Invalidate();
-           
+
             }
         }
     }

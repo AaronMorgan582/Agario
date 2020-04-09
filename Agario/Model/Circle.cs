@@ -60,5 +60,9 @@ namespace Model
         public PointF Location { get => loc; }
 
         public int ID { get => id; }
+
+        public object_type Type { get => type; }
+
+        public string GetName { get => this.Name; }
     }
 }

@@ -34,8 +34,9 @@ namespace ViewController
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(700, 450);
             this.Text = "Agario";
+            this.CenterToScreen();
 
             //Connect Button
             this.connect_button = new Button();
@@ -114,6 +115,16 @@ namespace ViewController
             this.title_label.Text = "The Blob";
             this.title_label.Font = new Font("Arial", 16);
 
+            //Label for the Player's username on game screen
+            this.username_label = new Label();
+            this.username_label.AutoSize = true;
+            this.username_label.Visible = false;
+            this.username_label.Location = new Point(0, 0);
+            this.username_label.Name = "Username";
+            this.username_label.Size = new System.Drawing.Size(79, 29);
+            this.username_label.TabIndex = 3;
+            //this.username_label.Font = new Font("Arial", 16);
+
 
             //Adding to Controls
             this.Controls.Add(connect_button);
@@ -136,7 +147,7 @@ namespace ViewController
         private Label server_label;
         private Label error_label;
         private Label title_label;
-
+        private Label username_label;
     }
 }
 
