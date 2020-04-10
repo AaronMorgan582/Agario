@@ -32,6 +32,8 @@ namespace ViewController
         private ILogger logger;
         private World game_world;
 
+        private int player_id;
+
         public Client_and_GUI(ILogger logger)
         {
             this.logger = logger;
@@ -75,7 +77,7 @@ namespace ViewController
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
             player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
-
+            player_id = player_circle.ID;
             lock (circle_list)
             {
                 circle_list.Add(player_circle);
@@ -98,7 +100,7 @@ namespace ViewController
             }
             catch (Exception e)
             {
-                logger.LogError($"{e}");
+                //logger.LogError($"{e}");
             }
 
             Networking.await_more_data(obj);
@@ -112,8 +114,8 @@ namespace ViewController
                 float player_x = player_circle.Location.X / 5000 * 1600;
                 float player_y = player_circle.Location.Y / 5000 * 900;
 
-                e.Graphics.TranslateTransform(100, 100);
-                e.Graphics.ScaleTransform(0.65f, 0.65f);
+
+                e.Graphics.ScaleTransform(3, 3);
 
                 this.DoubleBuffered = true;
 
@@ -136,10 +138,30 @@ namespace ViewController
                 {
                     foreach (Circle circle in circle_list)
                     {
+                        float loc_x = 0;
+                        float loc_y = 0;
+                        if (circle.ID == player_id)
+                        {
+                            circle.Radius = 100;
+                            //loc_x = 600 - (float)circle.Radius;
+                            //loc_y = 200 - (float)circle.Radius;
+                            loc_x = 400;
+                            loc_y = 0;
+                            float screen_x = (loc_x / 5_000) * 1_600;
+                            float screen_y = (loc_y / 5_000) * 900;
+                            logger.LogInformation($"COORDINATE: {loc_x}, {loc_y} | {screen_x}, {screen_y}");
+                            e.Graphics.TranslateTransform(screen_x, screen_y);
+                            //screen x = world x / world width * screen width T_T
+
+                        }
+                        else
+                        {
+                            loc_x = circle.Location.X / 5000 * 1600;
+                            loc_y = circle.Location.Y / 5000 * 900;
+                        }
                         int circle_color = circle.CircleColor;
                         Brush circle_brush = new SolidBrush(Color.FromArgb(circle_color));
-                        float loc_x = circle.Location.X / 5000 * 1600;
-                        float loc_y = circle.Location.Y / 5000 * 900;
+
 
                         double diameter = circle.Radius * 2;
 

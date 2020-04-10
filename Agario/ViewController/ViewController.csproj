@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FileLogger\FileLogger.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 

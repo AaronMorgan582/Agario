@@ -53,7 +53,7 @@ namespace Model
             Console.WriteLine(testCircle);
         }
 
-        public double Radius { get => radius; }
+        public double Radius { get => radius; set => radius = value; }
 
         public int CircleColor { get => argb_color; }
 
@@ -64,5 +64,6 @@ namespace Model
         public object_type Type { get => type; }
 
         public string GetName { get => this.Name; }
+
     }
 }
