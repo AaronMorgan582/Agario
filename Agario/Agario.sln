@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.txt = README.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileLogger", "..\..\assignment-seven-logging-and-networking-anti-social-social-club\Networking_and_Logging\FileLogger\FileLogger.csproj", "{6E7DFBF5-0E2A-451C-816A-7B03FBD5F39C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileLogger", "FileLogger\FileLogger.csproj", "{C7F3659B-7A48-48DB-BFF3-30D6AE6AE720}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +34,10 @@ Global
 		{9F9D38D9-9E02-4808-A1F6-8B100C1426A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F9D38D9-9E02-4808-A1F6-8B100C1426A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F9D38D9-9E02-4808-A1F6-8B100C1426A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E7DFBF5-0E2A-451C-816A-7B03FBD5F39C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E7DFBF5-0E2A-451C-816A-7B03FBD5F39C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E7DFBF5-0E2A-451C-816A-7B03FBD5F39C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E7DFBF5-0E2A-451C-816A-7B03FBD5F39C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7F3659B-7A48-48DB-BFF3-30D6AE6AE720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7F3659B-7A48-48DB-BFF3-30D6AE6AE720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7F3659B-7A48-48DB-BFF3-30D6AE6AE720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7F3659B-7A48-48DB-BFF3-30D6AE6AE720}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
