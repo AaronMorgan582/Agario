@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
+using System.Net.Sockets;
 
 namespace ViewController
 {
@@ -33,6 +34,7 @@ namespace ViewController
         private World game_world;
 
         private int player_id;
+        private Socket server_socket;
 
         public Client_and_GUI(ILogger logger)
         {
@@ -71,20 +73,33 @@ namespace ViewController
 
             Networking.Send(obj.socket, player_name);
             connected = true;
-            Networking.await_more_data(obj);  // * must "await_more_data" if you want to receive messages.
+            if (!obj.Has_More_Data())
+            {
+                Networking.await_more_data(obj);  // * must "await_more_data" if you want to receive messages.
+            }
         }
 
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
+            obj.on_data_received_handler = Get_World_Information;
+            Circle sentCircle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+            if (sentCircle.GetName.Equals(player_name))
+            {
+                player_circle = sentCircle;
+
+                Debug.WriteLine(player_circle.Location);
+
+            }
             player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
             player_id = player_circle.ID;
             lock (circle_list)
             {
+                player_circle.Radius = player_circle.Radius * 5;
                 circle_list.Add(player_circle);
+                
             }
 
             Networking.await_more_data(obj);
-            obj.on_data_received_handler = Get_World_Information;
         }
 
         private void Get_World_Information(Preserved_Socket_State obj)
@@ -104,19 +119,20 @@ namespace ViewController
             }
 
             Networking.await_more_data(obj);
+            //Networking.Send(obj.socket, $"(move,{(float)(player_circle.Location.X + 50000)},{(float)(player_circle.Location.Y + 50000)})");
             obj.on_data_received_handler = Get_World_Information;
+            
         }
 
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
             if (connected)
             {
-                float player_x = player_circle.Location.X / 5000 * 1600;
-                float player_y = player_circle.Location.Y / 5000 * 900;
+                //float player_x = player_circle.Location.X / 5000 * 1600;
+                //float player_y = player_circle.Location.Y / 5000 * 900;
 
 
-                e.Graphics.ScaleTransform(3, 3);
-
+                //e.Graphics.ScaleTransform(1,1);
                 this.DoubleBuffered = true;
 
                 connect_button.Visible = false;
@@ -130,7 +146,7 @@ namespace ViewController
 
                 username_label.Text = player_name;
                 username_label.Visible = true;
-                username_label.Location = new Point((int)player_circle.Location.X, (int)player_circle.Location.Y);
+                //username_label.Location = new Point((int)player_circle.Location.X, (int)player_circle.Location.Y);
 
                 error_label.Location = new Point(25, 850);
 
@@ -142,22 +158,18 @@ namespace ViewController
                         float loc_y = 0;
                         if (circle.ID == player_id)
                         {
-                            circle.Radius = 100;
-                            //loc_x = 600 - (float)circle.Radius;
-                            //loc_y = 200 - (float)circle.Radius;
-                            loc_x = 400;
-                            loc_y = 0;
+                            loc_x = (screen_width / 2) - (float)circle.Radius;
+                            loc_y = (screen_height / 2) - (float) circle.Radius;
                             float screen_x = (loc_x / 5_000) * 1_600;
                             float screen_y = (loc_y / 5_000) * 900;
                             logger.LogInformation($"COORDINATE: {loc_x}, {loc_y} | {screen_x}, {screen_y}");
-                            e.Graphics.TranslateTransform(screen_x, screen_y);
-                            //screen x = world x / world width * screen width T_T
-
+                            Debug.WriteLine(player_circle.Location);
                         }
                         else
                         {
                             loc_x = circle.Location.X / 5000 * 1600;
                             loc_y = circle.Location.Y / 5000 * 900;
+                            circle.Radius = 5;
                         }
                         int circle_color = circle.CircleColor;
                         Brush circle_brush = new SolidBrush(Color.FromArgb(circle_color));

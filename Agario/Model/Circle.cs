@@ -41,7 +41,7 @@ namespace Model
             this.Name = Name;
             this.Mass = Mass;
 
-            radius = (Mass / (2 * Math.PI));
+            radius = Math.Sqrt(Mass / (Math.PI));
         }
 
         public static void Main(string[] args)
