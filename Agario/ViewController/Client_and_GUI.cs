@@ -126,13 +126,11 @@ namespace ViewController
 
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
+
+            bool location_changed = true;
             if (connected)
             {
-                //float player_x = player_circle.Location.X / 5000 * 1600;
-                //float player_y = player_circle.Location.Y / 5000 * 900;
-
-
-                //e.Graphics.ScaleTransform(1,1);
+                
                 this.DoubleBuffered = true;
 
                 connect_button.Visible = false;
@@ -162,9 +160,19 @@ namespace ViewController
                             loc_y = (screen_height / 2) - (float) circle.Radius;
                             float screen_x = (loc_x / 5_000) * 1_600;
                             float screen_y = (loc_y / 5_000) * 900;
+
+                            if (location_changed)
+                            {
+                                PointF player_point = new PointF(loc_x, loc_y);
+                                Brush text_brush = new SolidBrush(Color.Black);
+                                e.Graphics.DrawString($"{player_circle.GetName}", new Font("Times New Roman", 12), text_brush, player_point);
+                                location_changed = false;
+                            }
+                           
                             logger.LogInformation($"COORDINATE: {loc_x}, {loc_y} | {screen_x}, {screen_y}");
                             Debug.WriteLine(player_circle.Location);
                         }
+
                         else
                         {
                             loc_x = circle.Location.X / 5000 * 1600;
@@ -174,11 +182,12 @@ namespace ViewController
                         int circle_color = circle.CircleColor;
                         Brush circle_brush = new SolidBrush(Color.FromArgb(circle_color));
 
-
                         double diameter = circle.Radius * 2;
 
                         Rectangle circ_as_rect = new Rectangle((int)loc_x, (int)loc_y, (int)diameter, (int)diameter);
                         e.Graphics.FillEllipse(circle_brush, circ_as_rect);
+
+
 
                     }
                 }
