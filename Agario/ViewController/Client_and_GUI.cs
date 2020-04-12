@@ -36,6 +36,9 @@ namespace ViewController
         private int player_id;
         private Socket server_socket;
 
+        private float movement_X;
+        private float movement_Y;
+
         public Client_and_GUI(ILogger logger)
         {
             this.logger = logger;
@@ -70,9 +73,10 @@ namespace ViewController
         {
             logger.LogInformation("Contact with Server established!");
             obj.on_data_received_handler = Get_Player_Circle;
-
             Networking.Send(obj.socket, player_name);
+
             connected = true;
+
             if (!obj.Has_More_Data())
             {
                 Networking.await_more_data(obj);  // * must "await_more_data" if you want to receive messages.
@@ -83,14 +87,15 @@ namespace ViewController
         {
             obj.on_data_received_handler = Get_World_Information;
             Circle sentCircle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+
             if (sentCircle.GetName.Equals(player_name))
             {
                 player_circle = sentCircle;
 
-                Debug.WriteLine(player_circle.Location);
+                //Debug.WriteLine(player_circle.Location);
 
             }
-            player_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+
             player_id = player_circle.ID;
             lock (circle_list)
             {
@@ -107,6 +112,12 @@ namespace ViewController
             try
             {
                 world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+
+                if (world_circle.Type.ToString().Equals("heartbeat"))
+                {
+                    this.Invalidate();
+                }
+
                 lock (circle_list)
                 {
                     circle_list.Add(world_circle);
@@ -119,7 +130,13 @@ namespace ViewController
             }
 
             Networking.await_more_data(obj);
-            //Networking.Send(obj.socket, $"(move,{(float)(player_circle.Location.X + 50000)},{(float)(player_circle.Location.Y + 50000)})");
+
+            Calculate_Movement(out movement_X, out movement_Y);
+
+            Debug.WriteLine($"Sent movement: {movement_X} {movement_Y}");
+
+            Networking.Send(obj.socket, $"(move,{movement_X},{movement_Y})");
+
             obj.on_data_received_handler = Get_World_Information;
             
         }
@@ -127,26 +144,14 @@ namespace ViewController
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
 
+
             bool location_changed = true;
             if (connected)
             {
-                
+                this.Invalidate();
+
+                Disable_Login_Menu();
                 this.DoubleBuffered = true;
-
-                connect_button.Visible = false;
-                player_name_box.Visible = false;
-                player_name_label.Visible = false;
-                server_address_box.Visible = false;
-                server_label.Visible = false;
-                title_label.Visible = false;
-                this.ClientSize = new System.Drawing.Size(screen_width, screen_height);
-                this.CenterToScreen();
-
-                username_label.Text = player_name;
-                username_label.Visible = true;
-                //username_label.Location = new Point((int)player_circle.Location.X, (int)player_circle.Location.Y);
-
-                error_label.Location = new Point(25, 850);
 
                 lock (circle_list)
                 {
@@ -154,10 +159,12 @@ namespace ViewController
                     {
                         float loc_x = 0;
                         float loc_y = 0;
+
                         if (circle.ID == player_id)
                         {
                             loc_x = (screen_width / 2) - (float)circle.Radius;
                             loc_y = (screen_height / 2) - (float) circle.Radius;
+
                             float screen_x = (loc_x / 5_000) * 1_600;
                             float screen_y = (loc_y / 5_000) * 900;
 
@@ -179,6 +186,7 @@ namespace ViewController
                             loc_y = circle.Location.Y / 5000 * 900;
                             circle.Radius = 5;
                         }
+
                         int circle_color = circle.CircleColor;
                         Brush circle_brush = new SolidBrush(Color.FromArgb(circle_color));
 
@@ -186,15 +194,38 @@ namespace ViewController
 
                         Rectangle circ_as_rect = new Rectangle((int)loc_x, (int)loc_y, (int)diameter, (int)diameter);
                         e.Graphics.FillEllipse(circle_brush, circ_as_rect);
-
-
-
-                    }
+                        
+;                    }
                 }
 
-                this.Invalidate();
-
             }
+
+        }
+        public void Calculate_Movement(out float movement_X, out float movement_Y)
+        {
+            float mouse_X = Cursor.Position.X;
+            float mouse_Y = Cursor.Position.Y;
+
+            Debug.WriteLine($"Mouse position: {mouse_X} {mouse_Y}");
+
+            movement_X = (mouse_X / 5000) * 1600;
+            movement_Y = (mouse_Y / 5000) * 900;
+
+            Debug.WriteLine($"Calculated location: {movement_X} {movement_Y}");
+        }
+
+        private void Disable_Login_Menu()
+        {
+            connect_button.Visible = false;
+            player_name_box.Visible = false;
+            player_name_label.Visible = false;
+            server_address_box.Visible = false;
+            server_label.Visible = false;
+            title_label.Visible = false;
+            error_label.Visible = false;
+
+            this.ClientSize = new System.Drawing.Size(screen_width, screen_height);
+            this.CenterToScreen();          
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Model
 {
     public class Circle
     {
-        public enum object_type {food, player, heartbeat, admin}
+        public enum object_type { food, player, heartbeat, admin }
 
         [JsonProperty]
         private PointF loc;
@@ -64,6 +64,7 @@ namespace Model
         public object_type Type { get => type; }
 
         public string GetName { get => this.Name; }
+
 
     }
 }

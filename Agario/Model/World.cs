@@ -10,12 +10,11 @@ namespace Model
     {
         protected const int HEIGHT = 5_000;
         protected int WIDTH = 5_000;
-        private Dictionary<int, Circle> circle_list;
-
+        private Dictionary<int, Circle> game_objects;
 
         public World(ILogger logger)
         {
-            circle_list = new Dictionary<int, Circle>();
+            game_objects = new Dictionary<int, Circle>();
             logger.LogInformation("List of Circles created.");
         }
     }
