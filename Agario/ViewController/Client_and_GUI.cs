@@ -25,6 +25,7 @@ namespace ViewController
         private Circle player_circle;
         private Circle world_circle;
         private List<Circle> circle_list = new List<Circle>();
+        Dictionary<int, Circle> circle_dictionary;
 
         private const int screen_width = 1600;
         private const int screen_height = 900;
@@ -43,7 +44,7 @@ namespace ViewController
         {
             this.logger = logger;
             game_world = new World(logger);
-
+            circle_dictionary = game_world.GetDictionary;
             InitializeComponent();
         }
 
@@ -93,14 +94,17 @@ namespace ViewController
                 player_circle = sentCircle;
 
                 //Debug.WriteLine(player_circle.Location);
-
             }
 
             player_id = player_circle.ID;
-            lock (circle_list)
+            lock (circle_dictionary)
             {
+                if (!circle_dictionary.ContainsKey(player_id))
+                {
+                    circle_dictionary.Add(player_id, player_circle);
+                }
                 player_circle.Radius = player_circle.Radius * 5;
-                circle_list.Add(player_circle);
+
                 
             }
 
@@ -118,15 +122,36 @@ namespace ViewController
                     this.Invalidate();
                 }
 
-                lock (circle_list)
+                lock (circle_dictionary)
                 {
-                    circle_list.Add(world_circle);
+                    if (!circle_dictionary.ContainsKey(world_circle.ID))
+                    {
+                        circle_dictionary.Add(world_circle.ID, world_circle);
+                    }
+                    else
+                    {
+                        Circle food_circle = circle_dictionary[world_circle.ID];
+                        PointF food_location = food_circle.Location;
+                        if (!food_location.Equals(world_circle.Location))
+                        {
+                            circle_dictionary.Remove(world_circle.ID);
+                            circle_dictionary.Add(world_circle.ID, world_circle);
+                        }
+                    }
                 }
-
+                
             }
             catch (Exception e)
             {
                 //logger.LogError($"{e}");
+            }
+
+            lock (circle_list)
+            {
+                foreach (int id in circle_dictionary.Keys)
+                {
+                    circle_list.Add(circle_dictionary[id]);
+                }
             }
 
             Networking.await_more_data(obj);
@@ -227,5 +252,6 @@ namespace ViewController
             this.ClientSize = new System.Drawing.Size(screen_width, screen_height);
             this.CenterToScreen();          
         }
+
     }
 }

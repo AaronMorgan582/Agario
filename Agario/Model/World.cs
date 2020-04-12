@@ -17,5 +17,12 @@ namespace Model
             game_objects = new Dictionary<int, Circle>();
             logger.LogInformation("List of Circles created.");
         }
+
+        public Dictionary<int, Circle> GetDictionary { get => game_objects; }
+
+        public IEnumerable<int> KeyCollection(){
+            Dictionary<int, Circle>.KeyCollection keys = game_objects.Keys;
+            return keys;
+        }
     }
 }
