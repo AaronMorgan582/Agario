@@ -64,7 +64,5 @@ namespace Model
         public object_type Type { get => type; }
 
         public string GetName { get => this.Name; }
-
-
     }
 }

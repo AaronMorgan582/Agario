@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
+using System.Collections;
 
 namespace ViewController
 {
@@ -38,6 +39,8 @@ namespace ViewController
 
         private float movement_X;
         private float movement_Y;
+
+        private HashSet<Circle> circle_set;
 
         public Client_and_GUI(ILogger logger)
         {
@@ -86,22 +89,23 @@ namespace ViewController
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
             obj.on_data_received_handler = Get_World_Information;
-            Circle sentCircle = JsonConvert.DeserializeObject<Circle>(obj.Message);
 
-            if (sentCircle.GetName.Equals(player_name))
+            Circle sent_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
+
+            if (sent_circle.GetName.Equals(player_name))
             {
-                player_circle = sentCircle;
+                player_circle = sent_circle;
+                player_id = player_circle.ID;
 
                 //Debug.WriteLine(player_circle.Location);
-
             }
 
-            player_id = player_circle.ID;
-            lock (circle_list)
+            lock (game_world)
             {
-                player_circle.Radius = player_circle.Radius * 5;
-                circle_list.Add(player_circle);
-                
+                if (!game_world.Contains(player_id))
+                {
+                    game_world.Add(player_id, player_circle);
+                }  
             }
 
             Networking.await_more_data(obj);
@@ -113,14 +117,22 @@ namespace ViewController
             {
                 world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
 
-                if (world_circle.Type.ToString().Equals("heartbeat"))
+                lock (game_world)
                 {
-                    this.Invalidate();
-                }
+                    if (!game_world.Contains(world_circle.ID))
+                    {
+                        game_world.Add(world_circle.ID, world_circle);
 
-                lock (circle_list)
-                {
-                    circle_list.Add(world_circle);
+                    }
+                    else
+                    {
+                        if (!world_circle.Location.Equals(game_world.Get_Circle(world_circle.ID))) //If the location has changed from what's already stored
+                        {
+                            game_world.Remove(world_circle.ID); //Remove the old entry
+                            game_world.Add(world_circle.ID, world_circle); //And add in the new one (which is the same "object" via the ID, but in a different location)
+                        }
+                    }
+
                 }
 
             }
@@ -143,29 +155,30 @@ namespace ViewController
 
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
-
-
             bool location_changed = true;
+
             if (connected)
             {
-                this.Invalidate();
-
                 Disable_Login_Menu();
                 this.DoubleBuffered = true;
+                this.Invalidate();
 
-                lock (circle_list)
+                lock (game_world)
                 {
-                    foreach (Circle circle in circle_list)
+                    foreach (int ID in game_world.Keys())
                     {
+                        Circle circle = game_world[ID];
                         float loc_x = 0;
                         float loc_y = 0;
 
                         if (circle.ID == player_id)
                         {
+                            //circle.Radius = circle.Radius * 5;
+
                             loc_x = (screen_width / 2) - (float)circle.Radius;
                             loc_y = (screen_height / 2) - (float) circle.Radius;
 
-                            float screen_x = (loc_x / 5_000) * 1_600;
+                            float screen_x = (loc_x / 5_000) * 1_600; //We don't actually use these, but they are currently just being used to see if the ratio conversion is working (logging.LogInformation)
                             float screen_y = (loc_y / 5_000) * 900;
 
                             if (location_changed)
@@ -177,7 +190,7 @@ namespace ViewController
                             }
                            
                             logger.LogInformation($"COORDINATE: {loc_x}, {loc_y} | {screen_x}, {screen_y}");
-                            Debug.WriteLine(player_circle.Location);
+                            Debug.WriteLine(circle.Location);
                         }
 
                         else
@@ -194,7 +207,12 @@ namespace ViewController
 
                         Rectangle circ_as_rect = new Rectangle((int)loc_x, (int)loc_y, (int)diameter, (int)diameter);
                         e.Graphics.FillEllipse(circle_brush, circ_as_rect);
-                        
+
+                        if (circle.Type.ToString().Equals("heartbeat"))
+                        {
+                            this.Invalidate();
+                        }
+
 ;                    }
                 }
 
