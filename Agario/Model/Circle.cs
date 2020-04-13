@@ -64,5 +64,9 @@ namespace Model
         public object_type Type { get => type; }
 
         public string GetName { get => this.Name; }
+
+        public float GetMass { get => this.Mass; }
+
+        public int BelongsTo { get => this.belongs_to; }
     }
 }

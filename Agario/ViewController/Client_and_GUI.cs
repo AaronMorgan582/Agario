@@ -19,13 +19,12 @@ namespace ViewController
 {
     public partial class Client_and_GUI : Form
     {
-        public enum object_type { food, player, heartbeat, admin }
         private Preserved_Socket_State server;
         private string player_name;
         private string server_name = "localhost";
         private Circle player_circle;
         private Circle world_circle;
-        private List<Circle> circle_list = new List<Circle>();
+        private List<Circle> circle_list = new List<Circle>(); //TODO: May need to remove.
 
         private const int screen_width = 1600;
         private const int screen_height = 900;
@@ -35,12 +34,11 @@ namespace ViewController
         private World game_world;
 
         private int player_id;
-        private Socket server_socket;
 
         private float movement_X;
         private float movement_Y;
 
-        private HashSet<Circle> circle_set;
+        private bool can_split = false;
 
         public Client_and_GUI(ILogger logger)
         {
@@ -80,6 +78,8 @@ namespace ViewController
 
             connected = true;
 
+            Client_and_GUI.ActiveForm.KeyDown += new KeyEventHandler(Space_Down);
+
             if (!obj.Has_More_Data())
             {
                 Networking.await_more_data(obj);  // * must "await_more_data" if you want to receive messages.
@@ -117,6 +117,11 @@ namespace ViewController
             {
                 world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
 
+                if (world_circle.Type.ToString().Equals("heartbeat"))
+                {
+                    this.Invalidate();
+                }
+
                 lock (game_world)
                 {
                     if (!game_world.Contains(world_circle.ID))
@@ -126,10 +131,11 @@ namespace ViewController
                     }
                     else
                     {
-                        if (!world_circle.Location.Equals(game_world.Get_Circle(world_circle.ID))) //If the location has changed from what's already stored
+                        if (!world_circle.Location.Equals(game_world[world_circle.ID])) //If the location has changed from what's already stored
                         {
                             game_world.Remove(world_circle.ID); //Remove the old entry
                             game_world.Add(world_circle.ID, world_circle); //And add in the new one (which is the same "object" via the ID, but in a different location)
+                            this.Invalidate();
                         }
                     }
 
@@ -146,6 +152,16 @@ namespace ViewController
             Calculate_Movement(out movement_X, out movement_Y);
 
             Debug.WriteLine($"Sent movement: {movement_X} {movement_Y}");
+
+            if(can_split)
+            {
+                float destination_X = player_circle.Location.X + 10;
+                float destination_Y = player_circle.Location.Y + 10;
+
+                Networking.Send(obj.socket, $"{destination_X},{destination_Y}");
+
+                can_split = false;
+            }
 
             Networking.Send(obj.socket, $"(move,{movement_X},{movement_Y})");
 
@@ -175,11 +191,14 @@ namespace ViewController
                         {
                             //circle.Radius = circle.Radius * 5;
 
-                            loc_x = (screen_width / 2) - (float)circle.Radius;
-                            loc_y = (screen_height / 2) - (float) circle.Radius;
+                            //loc_x = (screen_width / 2) - (float)circle.Radius;
+                            //loc_y = (screen_height / 2) - (float) circle.Radius;
 
-                            float screen_x = (loc_x / 5_000) * 1_600; //We don't actually use these, but they are currently just being used to see if the ratio conversion is working (logging.LogInformation)
-                            float screen_y = (loc_y / 5_000) * 900;
+                            loc_x = circle.Location.X / game_world.Width * screen_width;
+                            loc_y = circle.Location.Y / game_world.Height * screen_height;
+
+                            float screen_x = (loc_x / game_world.Width) * screen_width; //We don't actually use these, but they are currently just being used to see if the ratio conversion is working (logging.LogInformation)
+                            float screen_y = (loc_y / game_world.Height) * screen_height;
 
                             if (location_changed)
                             {
@@ -195,8 +214,8 @@ namespace ViewController
 
                         else
                         {
-                            loc_x = circle.Location.X / 5000 * 1600;
-                            loc_y = circle.Location.Y / 5000 * 900;
+                            loc_x = circle.Location.X / game_world.Width * screen_width;
+                            loc_y = circle.Location.Y / game_world.Height * screen_height;
                             circle.Radius = 5;
                         }
 
@@ -207,18 +226,22 @@ namespace ViewController
 
                         Rectangle circ_as_rect = new Rectangle((int)loc_x, (int)loc_y, (int)diameter, (int)diameter);
                         e.Graphics.FillEllipse(circle_brush, circ_as_rect);
-
-                        if (circle.Type.ToString().Equals("heartbeat"))
-                        {
-                            this.Invalidate();
-                        }
-
 ;                    }
                 }
-
             }
-
         }
+
+        private void Space_Down(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Space)
+            {
+                if(player_circle.GetMass > 10)
+                {
+                    can_split = true;
+                }
+            }
+        }
+
         public void Calculate_Movement(out float movement_X, out float movement_Y)
         {
             float mouse_X = Cursor.Position.X;
@@ -226,8 +249,8 @@ namespace ViewController
 
             Debug.WriteLine($"Mouse position: {mouse_X} {mouse_Y}");
 
-            movement_X = (mouse_X / 5000) * 1600;
-            movement_Y = (mouse_Y / 5000) * 900;
+            movement_X = (mouse_X / screen_width) * game_world.Width;
+            movement_Y = (mouse_Y / screen_height) * game_world.Height;
 
             Debug.WriteLine($"Calculated location: {movement_X} {movement_Y}");
         }

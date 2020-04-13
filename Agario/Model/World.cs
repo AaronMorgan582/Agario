@@ -8,8 +8,8 @@ namespace Model
 {
     public class World
     {
-        protected const int HEIGHT = 5_000;
-        protected int WIDTH = 5_000;
+        private const int HEIGHT = 5_000;
+        private const int WIDTH = 5_000;
         private Dictionary<int, Circle> game_objects;
         private ILogger logger;
 
@@ -18,6 +18,9 @@ namespace Model
             game_objects = new Dictionary<int, Circle>();
             this.logger = logger;
         }
+
+        public int Width { get => WIDTH; }
+        public int Height { get => HEIGHT; }
 
         public void Add(int ID, Circle circle)
         {
@@ -34,11 +37,6 @@ namespace Model
         public bool Contains(int ID)
         {
             return game_objects.ContainsKey(ID);
-        }
-
-        public Circle Get_Circle(int ID)
-        {
-            return game_objects[ID];
         }
 
         public IEnumerable<int> Keys()
@@ -77,5 +75,7 @@ namespace Model
 
             return game_objects_list;
         }
+
+
     }
 }

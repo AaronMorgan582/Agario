@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Model;
 
@@ -123,6 +124,8 @@ namespace ViewController
             this.Controls.Add(server_label);
             this.Controls.Add(error_label);
             this.Controls.Add(title_label);
+
+            
 
             this.Paint += new PaintEventHandler(Draw_Scene);
         }
