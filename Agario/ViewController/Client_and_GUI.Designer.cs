@@ -116,6 +116,17 @@ namespace ViewController
             this.title_label.Text = "The Blob";
             this.title_label.Font = new Font("Arial", 16);
 
+            //Label for Game Over
+            this.game_over_label = new Label();
+            this.game_over_label.AutoSize = true;
+            this.game_over_label.Visible = false;
+            this.game_over_label.Location = new Point(287, 53);
+            this.game_over_label.Name = "game_over_label";
+            this.game_over_label.Size = new System.Drawing.Size(79, 29);
+            this.game_over_label.TabIndex = 3;
+            this.game_over_label.Text = "Game Over...";
+            this.game_over_label.Font = new Font("Arial", 32);
+
             //Adding to Controls
             this.Controls.Add(connect_button);
             this.Controls.Add(player_name_box);
@@ -139,6 +150,7 @@ namespace ViewController
         private Label server_label;
         private Label error_label;
         private Label title_label;
+        private Label game_over_label;
 
     }
 }

@@ -65,7 +65,7 @@ namespace Model
 
         public string GetName { get => this.Name; }
 
-        public float GetMass { get => this.Mass; }
+        public float GetMass { get => this.Mass; set => this.Mass = value; }
 
         public int BelongsTo { get => this.belongs_to; }
     }

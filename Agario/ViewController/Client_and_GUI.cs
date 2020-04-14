@@ -14,11 +14,13 @@ using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
 using System.Collections;
+using System.Drawing.Drawing2D;
 
 namespace ViewController
 {
     public partial class Client_and_GUI : Form
     {
+        
         private Preserved_Socket_State server;
         private string player_name;
         private string server_name = "localhost";
@@ -30,6 +32,7 @@ namespace ViewController
         private const int screen_height = 900;
 
         private bool connected = false;
+        private bool isDead = false;
         private ILogger logger;
         private World game_world;
 
@@ -144,10 +147,18 @@ namespace ViewController
             }
             catch (Exception e)
             {
-                //logger.LogError($"{e}");
+                logger.LogError($"Json convert error.");
             }
-
-            Networking.await_more_data(obj);
+            try
+            {
+                Networking.await_more_data(obj);
+            }
+            catch(SocketException e)
+            {
+                logger.LogInformation($"{player_circle.GetName} has been killed.");
+                connected = false;
+                isDead = true;
+            }
 
             Calculate_Movement(out movement_X, out movement_Y);
 
@@ -175,6 +186,7 @@ namespace ViewController
 
             if (connected)
             {
+                e.Graphics.ScaleTransform(1, 1, MatrixOrder.Prepend);
                 Disable_Login_Menu();
                 this.DoubleBuffered = true;
                 this.Invalidate();
@@ -189,16 +201,10 @@ namespace ViewController
 
                         if (circle.ID == player_id)
                         {
-                            //circle.Radius = circle.Radius * 5;
-
-                            //loc_x = (screen_width / 2) - (float)circle.Radius;
-                            //loc_y = (screen_height / 2) - (float) circle.Radius;
-
                             loc_x = circle.Location.X / game_world.Width * screen_width;
                             loc_y = circle.Location.Y / game_world.Height * screen_height;
 
-                            float screen_x = (loc_x / game_world.Width) * screen_width; //We don't actually use these, but they are currently just being used to see if the ratio conversion is working (logging.LogInformation)
-                            float screen_y = (loc_y / game_world.Height) * screen_height;
+                            e.Graphics.TranslateTransform((-loc_x + (screen_width / 2)), ((-loc_y + (screen_height / 2))));
 
                             if (location_changed)
                             {
@@ -208,12 +214,12 @@ namespace ViewController
                                 location_changed = false;
                             }
                            
-                            logger.LogInformation($"COORDINATE: {loc_x}, {loc_y} | {screen_x}, {screen_y}");
+                            logger.LogInformation($"COORDINATE: {loc_x}, {loc_y}");
                             Debug.WriteLine(circle.Location);
                         }
-
                         else
                         {
+                            
                             loc_x = circle.Location.X / game_world.Width * screen_width;
                             loc_y = circle.Location.Y / game_world.Height * screen_height;
                             circle.Radius = 5;
@@ -229,19 +235,33 @@ namespace ViewController
 ;                    }
                 }
             }
+            else if(isDead)
+            {
+                Display_Game_Over_Screen(e);
+            }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Space_Down(object sender, KeyEventArgs e)
         {
             if(e.KeyCode == Keys.Space)
             {
-                if(player_circle.GetMass > 10)
+                if (player_circle.GetMass > 10)
                 {
                     can_split = true;
                 }
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="movement_X"></param>
+        /// <param name="movement_Y"></param>
         public void Calculate_Movement(out float movement_X, out float movement_Y)
         {
             float mouse_X = Cursor.Position.X;
@@ -255,6 +275,33 @@ namespace ViewController
             Debug.WriteLine($"Calculated location: {movement_X} {movement_Y}");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="e"></param>
+        private void Display_Game_Over_Screen(PaintEventArgs e)
+        {
+            Brush text_brush = new SolidBrush(Color.Black);
+            Point game_over_point = new Point(260, 86);
+            Point mass_point = new Point(287, 107);
+
+            Width = 700;
+            Height = 450;
+            CenterToScreen();
+            
+            player_name_label.Show();
+            player_name_box.Show();
+            title_label.Show();
+            server_label.Show();
+            server_address_box.Show();
+            connect_button.Text = "Try Again";
+            connect_button.Show();
+            e.Graphics.DrawString($"Game Over...Try Again?", new Font("Times New Roman", 12), text_brush, game_over_point);
+            e.Graphics.DrawString($"Total Mass: {player_circle.GetMass}", new Font("Times New Roman", 12), text_brush, mass_point);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
         private void Disable_Login_Menu()
         {
             connect_button.Visible = false;
@@ -265,7 +312,8 @@ namespace ViewController
             title_label.Visible = false;
             error_label.Visible = false;
 
-            this.ClientSize = new System.Drawing.Size(screen_width, screen_height);
+            this.Width = 1600;
+            this.Height = 900;
             this.CenterToScreen();          
         }
     }
