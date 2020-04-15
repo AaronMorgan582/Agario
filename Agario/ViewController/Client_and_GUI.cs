@@ -21,6 +21,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
+using System.Diagnostics;
 
 namespace ViewController
 {
@@ -80,7 +81,6 @@ namespace ViewController
             }
             server_name = server_address_box?.Text;
             this.server = Networking.Connect_to_Server(Contact_Established, server_name);
-
         }
 
         /// <summary>
@@ -199,10 +199,8 @@ namespace ViewController
             {
                 float destination_X = player_circle.Location.X + 100;
                 float destination_Y = player_circle.Location.Y + 100;
-
-                Networking.Send(obj.socket, $"split,{destination_X},{destination_Y}");
-
                 can_split = false;
+                Networking.Send(obj.socket, $"split,{destination_X},{destination_Y}");
             }
 
             obj.on_data_received_handler = Get_World_Information;
@@ -230,30 +228,14 @@ namespace ViewController
                     foreach (int ID in game_world.IDs())
                     {
                         Circle circle = game_world[ID];
-                        float loc_x = 0;
-                        float loc_y = 0;
-
+                        float loc_x = circle.Location.X / game_world.Width * screen_width;
+                        float loc_y = circle.Location.Y / game_world.Height * screen_height;
                         // If one of the circles is the user, center the camera around them
                         if (circle.ID == player_id)
                         {
-                            loc_x = circle.Location.X / game_world.Width * screen_width;
-                            loc_y = circle.Location.Y / game_world.Height * screen_height;
                             e.Graphics.TranslateTransform(-loc_x + screen_width / 2, -loc_y + screen_height / 2);
-                            //Zooming
-                            //float scale_x =circle.GetMass / 8;
-                            //float scale_y =circle.GetMass / 8;
-                            //float squared_scale_x = scale_x * scale_x;
-                            //float squared_scale_y = scale_y * scale_y;
-                            //e.Graphics.ScaleTransform(scale_x,scale_y);
-                            //e.Graphics.TranslateTransform(-(loc_x) + (loc_x * scale_x) / squared_scale_x, -(loc_y) + (loc_y * scale_y) / squared_scale_y);
-                           
+                            Debug.WriteLine(loc_x);
                             logger.LogDebug($"COORDINATE: {loc_x}, {loc_y}");
-                        }
-                        else
-                        {
-                            
-                            loc_x = circle.Location.X / game_world.Width * screen_width;
-                            loc_y = circle.Location.Y / game_world.Height * screen_height;
                         }
 
                         int circle_color = circle.CircleColor;

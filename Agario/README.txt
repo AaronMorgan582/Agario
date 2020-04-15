@@ -1,15 +1,23 @@
 Author:     Aaron Morgan and Xavier Davis
-Partner:    None
+Partner:    Xavier Davis and Aaron Morgan
 Date:       4/1/2020
 Course:     CS 3500, University of Utah, School of Computing
 Assignment: Assignment #8 - Agario Client
 Copyright:  CS 3500, Xavier Davis and Aaron Morgan - This work may not be copied for use in Academic Coursework.
 Github Repository: https://github.com/uofu-cs3500-spring20/assignment-eight-agario-client-team-yoshi.git
-Commit #:  
+Commit #:  Refer to Piazza post under Xavier Davis
 
 1. Comments to Evaluators:
 
-    None at this time.
+    Throughout this assignment, we found ourselves left to our own devices in an unfamiliar world. With the responsibility
+    of completing a multiplayer game within a little over a week's time, we found ourselves unable to meet all criteria. 
+    
+    1. When using the cursor, the user's circle will slow to a stop, and the still cursor point will become the new movement center.
+    2. Our splitting function isn't implemented properly, and will only spawn another circle about a hundred units from the player.
+    3. We never figured out how to make our zoom work as intended. A couple times we thought we had it, but with various tests,
+    were dissapointed to find they only worked in controlled situations. 
+    4. When starting up a new game after death, the game world sometimes doesn't draw itself, leaving the player stuck on the game over screen. 
+    5. By closing prematurely, our logger is sometimes unable to successfully close itself leading to an error on occasion.
 
 2. Assignment Specific Topics
 
@@ -69,6 +77,15 @@ Commit #:
 
     1) StackOverflow: How do I get the current screen cursor position? https://stackoverflow.com/questions/6165828/how-do-i-get-the-current-screen-cursor-position
     2) StackOverflow: How do I center a window onscreen in C#? https://stackoverflow.com/questions/4601827/how-do-i-center-a-window-onscreen-in-c 
+    3) Microsoft: const (C# Reference) https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/const
+    4) Microsoft: MatrixOrder Enumeration https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder
+    5) Microsoft: Cursors Class https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.cursors?view=netframework-4.8
+    6) Microsoft: PaintEventArgs Class https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.painteventargs?view=netframework-4.8
+    7) Microsoft: Point Struct https://docs.microsoft.com/en-us/dotnet/api/system.drawing.point?view=netframework-4.8
+    8) Microsoft: KeyEventArgs.KeyCode Property https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.keyeventargs.keycode?view=netframework-4.8
+    9) DotNetPerls: C# Font Type: FontFamily and FontStyle https://www.dotnetperls.com/font
+    10) StackOverflow: How to delete a drawn circle in c# windows form? https://stackoverflow.com/questions/4124638/how-to-delete-a-drawn-circle-in-c-sharp-windows-form
+
     
 
 
