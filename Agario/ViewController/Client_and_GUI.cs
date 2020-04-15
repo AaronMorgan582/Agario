@@ -1,20 +1,26 @@
-﻿using Model;
+﻿/// <summary>
+/// 
+/// Author:    Aaron Morgan and Xavier Davis
+/// Partner:   None
+/// Date:      4/14/2020
+/// Course:    CS 3500, University of Utah, School of Computing 
+/// Copyright: CS 3500, Aaron Morgan and Xavier Davis
+/// 
+/// We, Aaron Morgan and Xavier Davis, certify that we wrote this code from scratch and did not copy it in part
+/// or in whole from another source, with the exception of the Connect_To_Server method, which was primarily
+/// provided by Prof. Jim de St. Germain for the University of Utah's Computing CS 3500 class, during the
+/// Spring 2020 term.
+/// 
+/// </summary>
+
+using Model;
 using NetworkingNS;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
-using System.Collections;
-using System.Drawing.Drawing2D;
 
 namespace ViewController
 {
@@ -23,7 +29,7 @@ namespace ViewController
         
         private Preserved_Socket_State server;
         private string player_name;
-        private string server_name = "localhost";
+        private string server_name;
         private Circle player_circle;
         private Circle world_circle;
 
@@ -50,11 +56,17 @@ namespace ViewController
             InitializeComponent();
         }
 
+        /// <summary>
+        /// This is the event for when the "Connect" button is clicked on the Login GUI. When the button is pressed,
+        /// it attempts to establish a connection with the given Server.
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
         private void Connect_To_Server(object o, EventArgs e)
         {
             if (this.server != null && this.server.socket.Connected)
             {
-                logger.LogInformation("Shutting down the connection"); //TODO: Write to the screen when the connection has ended.
+                logger.LogInformation("Shutting down the connection");
                 this.server.socket.Shutdown(System.Net.Sockets.SocketShutdown.Both);
                 return;
             }
@@ -67,11 +79,16 @@ namespace ViewController
                 player_name = $"{new Random()}";
             }
             server_name = server_address_box?.Text;
-            // * upon connection the code (in another thread) will execute the "Contact_Established" method.
             this.server = Networking.Connect_to_Server(Contact_Established, server_name);
 
         }
 
+        /// <summary>
+        /// This handles what happens when the connection with the Server has
+        /// been established. When the Server has connected, the player's name
+        /// is sent to the Server so it can establish a Circle object for the player.
+        /// </summary>
+        /// <param name="obj"></param>
         private void Contact_Established(Preserved_Socket_State obj)
         {
             logger.LogInformation("Contact with Server established!");
@@ -88,6 +105,12 @@ namespace ViewController
             }
         }
 
+        /// <summary>
+        /// This handles the first phase of the connection protocol. The first Circle
+        /// sent by the Server should be the Circle designated to the player. Once it is
+        /// received, it is added to the World's collection of objects.
+        /// </summary>
+        /// <param name="obj"></param>
         private void Get_Player_Circle(Preserved_Socket_State obj)
         {
             obj.on_data_received_handler = Get_World_Information;
@@ -111,12 +134,18 @@ namespace ViewController
             Networking.await_more_data(obj);
         }
 
+        /// <summary>
+        /// This handles the second phase of the connection protocol. After the player's
+        /// Circle has been received, the rest should be all the other
+        /// game objects (food, other players, heartbeats).
+        /// </summary>
+        /// <param name="obj"></param>
         private void Get_World_Information(Preserved_Socket_State obj)
         {
             try
             {
-                Calculate_Movement(out movement_X, out movement_Y);
-                Networking.Send(obj.socket, $"(move,{movement_X},{movement_Y})");
+                Calculate_Movement(out movement_X, out movement_Y); //Calculates the player's movement based on the mouse's position.
+                Networking.Send(obj.socket, $"(move,{movement_X},{movement_Y})"); //Sends the movement to the Server.
                 logger.LogDebug($"Sent movement: {movement_X} {movement_Y}");
 
                 world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
@@ -168,10 +197,8 @@ namespace ViewController
             // If the user wishes to split, send the coordinates for split
             if(can_split)
             {
-                //float destination_X = player_circle.Location.X + 10;
-                //float destination_Y = player_circle.Location.Y + 10;
-                float destination_X = 1000;
-                float destination_Y = 500;
+                float destination_X = player_circle.Location.X + 100;
+                float destination_Y = player_circle.Location.Y + 100;
 
                 Networking.Send(obj.socket, $"split,{destination_X},{destination_Y}");
 
@@ -200,7 +227,7 @@ namespace ViewController
 
                 lock (game_world)
                 {
-                    foreach (int ID in game_world.Keys())
+                    foreach (int ID in game_world.IDs())
                     {
                         Circle circle = game_world[ID];
                         float loc_x = 0;
@@ -227,7 +254,6 @@ namespace ViewController
                             
                             loc_x = circle.Location.X / game_world.Width * screen_width;
                             loc_y = circle.Location.Y / game_world.Height * screen_height;
-                            circle.Radius = 5;
                         }
 
                         int circle_color = circle.CircleColor;

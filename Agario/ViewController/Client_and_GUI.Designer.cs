@@ -1,7 +1,18 @@
-﻿using System;
+﻿/// <summary>
+/// 
+/// Author:    Aaron Morgan and Xavier Davis
+/// Partner:   None
+/// Date:      4/14/2020
+/// Course:    CS 3500, University of Utah, School of Computing 
+/// Copyright: CS 3500, Aaron Morgan and Xavier Davis
+/// 
+/// We, Aaron Morgan and Xavier Davis, certify that we wrote this code from scratch and did not copy it in part
+/// or in whole from another source.
+/// 
+/// </summary>
+
 using System.Drawing;
 using System.Windows.Forms;
-using Model;
 
 namespace ViewController
 {
@@ -47,7 +58,6 @@ namespace ViewController
             this.connect_button.Text = "Connect";
             this.connect_button.Click += Connect_To_Server;
 
-
             //Input Box for Player Name
             this.player_name_box = new TextBox();
             this.player_name_box.Location = new Point(300, 160);
@@ -86,7 +96,6 @@ namespace ViewController
             this.server_label.TabIndex = 3;
             this.server_label.Text = "Server:";
 
-
             //Label for Error text
             this.error_label = new Label();
             this.error_label.AutoSize = true;
@@ -96,7 +105,6 @@ namespace ViewController
             this.error_label.Size = new System.Drawing.Size(79, 29);
             this.error_label.TabIndex = 3;
             this.error_label.Text = "Error: ";
-
 
             //Label for Title
             this.title_label = new Label();
@@ -128,8 +136,6 @@ namespace ViewController
             this.Controls.Add(server_label);
             this.Controls.Add(error_label);
             this.Controls.Add(title_label);
-
-            
 
             this.Paint += new PaintEventHandler(Draw_Scene);
         }

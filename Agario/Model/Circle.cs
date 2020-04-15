@@ -1,9 +1,26 @@
-﻿using Newtonsoft.Json;
+﻿/// <summary>
+/// 
+/// Author:    Aaron Morgan and Xavier Davis
+/// Partner:   None
+/// Date:      4/14/2020
+/// Course:    CS 3500, University of Utah, School of Computing 
+/// Copyright: CS 3500, Aaron Morgan and Xavier Davis
+/// 
+/// We, Aaron Morgan and Xavier Davis, certify that we wrote this code from scratch and did not copy it in part
+/// or in whole from another source.
+/// 
+/// </summary>
+
+
+using Newtonsoft.Json;
 using System;
 using System.Drawing;
 
 namespace Model
 {
+    /// <summary>
+    /// The Circle class that is to be used for the Agario game.
+    /// </summary>
     public class Circle
     {
         public enum object_type { food, player, heartbeat, admin }
@@ -53,15 +70,6 @@ namespace Model
             this.Mass = Mass;
 
             radius = (float) Math.Sqrt(Mass / (Math.PI));
-        }
-
-        public static void Main(string[] args)
-        {
-            string message = "{ \"loc\":{ \"X\":1768.0,\"Y\":320.0},\"argb_color\":-2445240,\"id\":0,\"belongs_to\":0,\"type\":0,\"Name\":\"Player\",\"Mass\":10.0}";
-
-            Circle testCircle = JsonConvert.DeserializeObject<Circle>(message);
-
-            Console.WriteLine(testCircle);
         }
 
         #region Getters/Setters for the Circle class

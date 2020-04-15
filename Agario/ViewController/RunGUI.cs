@@ -1,7 +1,17 @@
+/// <summary>
+/// 
+/// Author:    Aaron Morgan and Xavier Davis
+/// Partner:   None
+/// Date:      4/14/2020
+/// Course:    CS 3500, University of Utah, School of Computing 
+/// Copyright: CS 3500, Aaron Morgan and Xavier Davis
+/// 
+/// We, Aaron Morgan and Xavier Davis, certify that we wrote this code from scratch and did not copy it in part
+/// or in whole from another source.
+/// 
+/// </summary>
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using FileLogger;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +22,7 @@ namespace ViewController
     static class RunGUI
     {
         /// <summary>
-        ///  The main entry point for the application.
+        ///  The main entry point for the Agario application.
         /// </summary>
         [STAThread]
         static void Main()
@@ -38,7 +48,6 @@ namespace ViewController
                     Application.Run(new Client_and_GUI(logger));
                 }
             }
-
         }
     }
 }

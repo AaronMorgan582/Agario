@@ -28,9 +28,17 @@ Commit #:
 
     B) User Interface and Game Design Decisions
 
+        We thought the Login/Game Over screen should be smaller than the actual game screen, mostly because it didn't need as much information displayed
+        on it, so we adjusted it accordingly.
+        
+        We decided to center the screen at all times because we thought it made it look a bit more organized.
+
 3. Partnership:
 
     A) Contributions
+
+        We worked together throughout the vast majority of the assignment. The only exception to this was when Aaron was trying to convert the original List
+        we were using to the World's Dictionary. He added the methods found in World that allowed us to access/modify the Dictionary (Add, Remove, etc).
 
     B) Branching
 
@@ -43,9 +51,24 @@ Commit #:
 
 4. Testing:
 
+    We mostly tested in three different ways:
+
+        1) Starting the Client/Server - Primarily used to the drawing/displaying of the screen, as well as all of the objects. This is also how we tried to figure out
+        how to center the "camera" on the player and zoom in.
+
+        2) The Logger: We used this for general information gathering, such as when the player has connected to the server.
+
+        3) The Debug Output window: We noticed that we needed information printed out as the Client/Server was running, so we used a number of Debug.WriteLine
+        statements to check our mathematical equations, such as the conversion from the World's set size to the screen size.
+
 5. Consulted Peers:
 
+    None.
+
 6. References:
+
+    1) StackOverflow: How do I get the current screen cursor position? https://stackoverflow.com/questions/6165828/how-do-i-get-the-current-screen-cursor-position
+    2) StackOverflow: How do I center a window onscreen in C#? https://stackoverflow.com/questions/4601827/how-do-i-center-a-window-onscreen-in-c 
     
 
 
