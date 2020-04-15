@@ -66,7 +66,13 @@ namespace FileLogger
         {
             string shortLogLevel = logLevel.ToString().Substring(0, 5);
             string closeMessage = ". This message was produced by a Log" + logLevel + " call";
-            //file.WriteLine(ShowTimeAndThreadClass.ShowTimeAndThread() + "- " + shortLogLevel + " - " + formatter(state, exception) + closeMessage);
+            try
+            {
+                file.WriteLine(ShowTimeAndThreadClass.ShowTimeAndThread() + "- " + shortLogLevel + " - " + formatter(state, exception) + closeMessage);
+            }
+            catch
+            {
+            }
         }
 
         /// <summary>

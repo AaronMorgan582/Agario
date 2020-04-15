@@ -26,7 +26,6 @@ namespace ViewController
         private string server_name = "localhost";
         private Circle player_circle;
         private Circle world_circle;
-        private List<Circle> circle_list = new List<Circle>(); //TODO: May need to remove.
 
         private const int screen_width = 1600;
         private const int screen_height = 900;
@@ -55,12 +54,12 @@ namespace ViewController
         {
             if (this.server != null && this.server.socket.Connected)
             {
-                Debug.WriteLine("Shutting down the connection"); //TODO: Write to the screen when the connection has ended.
+                logger.LogInformation("Shutting down the connection"); //TODO: Write to the screen when the connection has ended.
                 this.server.socket.Shutdown(System.Net.Sockets.SocketShutdown.Both);
                 return;
             }
 
-            Debug.WriteLine("Asking the network code to connect to the server.");
+            logger.LogInformation("Asking the network code to connect to the server.");
 
             player_name = player_name_box.Text;
             if (player_name is "")
@@ -99,8 +98,6 @@ namespace ViewController
             {
                 player_circle = sent_circle;
                 player_id = player_circle.ID;
-
-                //Debug.WriteLine(player_circle.Location);
             }
 
             lock (game_world)
@@ -118,6 +115,10 @@ namespace ViewController
         {
             try
             {
+                Calculate_Movement(out movement_X, out movement_Y);
+                Networking.Send(obj.socket, $"(move,{movement_X},{movement_Y})");
+                logger.LogDebug($"Sent movement: {movement_X} {movement_Y}");
+
                 world_circle = JsonConvert.DeserializeObject<Circle>(obj.Message);
 
                 if (world_circle.Type.ToString().Equals("heartbeat"))
@@ -134,11 +135,14 @@ namespace ViewController
                     }
                     else
                     {
-                        if (!world_circle.Location.Equals(game_world[world_circle.ID])) //If the location has changed from what's already stored
+                        if (!world_circle.Location.Equals(game_world[world_circle.ID])) //If the player location has changed from what's already stored
                         {
                             game_world.Remove(world_circle.ID); //Remove the old entry
                             game_world.Add(world_circle.ID, world_circle); //And add in the new one (which is the same "object" via the ID, but in a different location)
-                            this.Invalidate();
+                        }
+                        if (world_circle.GetMass <= 0 && world_circle.Type.ToString().Equals("food"))
+                        {
+                            game_world.Remove(world_circle.ID); //Remove the old entry
                         }
                     }
 
@@ -155,38 +159,41 @@ namespace ViewController
             }
             catch(SocketException e)
             {
+                // If a player has died, stop drawing the game scene and display game over screen
                 logger.LogInformation($"{player_circle.GetName} has been killed.");
                 connected = false;
                 isDead = true;
             }
 
-            Calculate_Movement(out movement_X, out movement_Y);
-
-            Debug.WriteLine($"Sent movement: {movement_X} {movement_Y}");
-
+            // If the user wishes to split, send the coordinates for split
             if(can_split)
             {
-                float destination_X = player_circle.Location.X + 10;
-                float destination_Y = player_circle.Location.Y + 10;
+                //float destination_X = player_circle.Location.X + 10;
+                //float destination_Y = player_circle.Location.Y + 10;
+                float destination_X = 1000;
+                float destination_Y = 500;
 
-                Networking.Send(obj.socket, $"{destination_X},{destination_Y}");
+                Networking.Send(obj.socket, $"split,{destination_X},{destination_Y}");
 
                 can_split = false;
             }
-
-            Networking.Send(obj.socket, $"(move,{movement_X},{movement_Y})");
 
             obj.on_data_received_handler = Get_World_Information;
             
         }
 
+        /// <summary>
+        /// The event for drawing the game and game over scene
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Draw_Scene(object sender, PaintEventArgs e)
         {
             bool location_changed = true;
 
             if (connected)
             {
-                e.Graphics.ScaleTransform(1, 1, MatrixOrder.Prepend);
+                // When a user is connected, disable the login menu and begin drawing the game scene
                 Disable_Login_Menu();
                 this.DoubleBuffered = true;
                 this.Invalidate();
@@ -199,23 +206,21 @@ namespace ViewController
                         float loc_x = 0;
                         float loc_y = 0;
 
+                        // If one of the circles is the user, center the camera around them
                         if (circle.ID == player_id)
                         {
                             loc_x = circle.Location.X / game_world.Width * screen_width;
                             loc_y = circle.Location.Y / game_world.Height * screen_height;
-
-                            e.Graphics.TranslateTransform((-loc_x + (screen_width / 2)), ((-loc_y + (screen_height / 2))));
-
-                            if (location_changed)
-                            {
-                                PointF player_point = new PointF(loc_x, loc_y);
-                                Brush text_brush = new SolidBrush(Color.Black);
-                                e.Graphics.DrawString($"{player_circle.GetName}", new Font("Times New Roman", 12), text_brush, player_point);
-                                location_changed = false;
-                            }
+                            e.Graphics.TranslateTransform(-loc_x + screen_width / 2, -loc_y + screen_height / 2);
+                            //Zooming
+                            //float scale_x =circle.GetMass / 8;
+                            //float scale_y =circle.GetMass / 8;
+                            //float squared_scale_x = scale_x * scale_x;
+                            //float squared_scale_y = scale_y * scale_y;
+                            //e.Graphics.ScaleTransform(scale_x,scale_y);
+                            //e.Graphics.TranslateTransform(-(loc_x) + (loc_x * scale_x) / squared_scale_x, -(loc_y) + (loc_y * scale_y) / squared_scale_y);
                            
-                            logger.LogInformation($"COORDINATE: {loc_x}, {loc_y}");
-                            Debug.WriteLine(circle.Location);
+                            logger.LogDebug($"COORDINATE: {loc_x}, {loc_y}");
                         }
                         else
                         {
@@ -232,6 +237,14 @@ namespace ViewController
 
                         Rectangle circ_as_rect = new Rectangle((int)loc_x, (int)loc_y, (int)diameter, (int)diameter);
                         e.Graphics.FillEllipse(circle_brush, circ_as_rect);
+
+                        if (location_changed)
+                        {
+                            PointF player_point = new PointF(loc_x, loc_y);
+                            Brush text_brush = new SolidBrush(Color.Black);
+                            e.Graphics.DrawString($"{player_circle.GetName}", new Font("Times New Roman", 12), text_brush, player_point);
+                            location_changed = false;
+                        }
 ;                    }
                 }
             }
@@ -242,7 +255,7 @@ namespace ViewController
         }
 
         /// <summary>
-        /// 
+        /// Handler for when a player wants to split
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -258,25 +271,28 @@ namespace ViewController
         }
 
         /// <summary>
-        /// 
+        /// This helper method determines the cursor's position, which is used to calculate
+        /// how far to move the player
         /// </summary>
-        /// <param name="movement_X"></param>
-        /// <param name="movement_Y"></param>
+        /// <param name="movement_X">Reference to player's x position</param>
+        /// <param name="movement_Y">Reference to player's y position</param>
         public void Calculate_Movement(out float movement_X, out float movement_Y)
         {
             float mouse_X = Cursor.Position.X;
             float mouse_Y = Cursor.Position.Y;
+            float monitor_X = (mouse_X / 1920) * screen_width;
+            float monitor_Y = (mouse_Y / 1080) * screen_height;
 
-            Debug.WriteLine($"Mouse position: {mouse_X} {mouse_Y}");
+            logger.LogDebug($"Mouse position: {mouse_X} {mouse_Y}");
 
-            movement_X = (mouse_X / screen_width) * game_world.Width;
-            movement_Y = (mouse_Y / screen_height) * game_world.Height;
+            movement_X = (monitor_X / screen_width) * game_world.Width;
+            movement_Y = (monitor_Y / screen_width) * game_world.Height;
 
-            Debug.WriteLine($"Calculated location: {movement_X} {movement_Y}");
+            logger.LogDebug($"Calculated location: {movement_X} {movement_Y}");
         }
 
         /// <summary>
-        /// 
+        /// This helper method displays a game over screen when the user dies
         /// </summary>
         /// <param name="e"></param>
         private void Display_Game_Over_Screen(PaintEventArgs e)
@@ -300,7 +316,7 @@ namespace ViewController
             e.Graphics.DrawString($"Total Mass: {player_circle.GetMass}", new Font("Times New Roman", 12), text_brush, mass_point);
         }
         /// <summary>
-        /// 
+        /// This helper method disables the GUI controls found on the login screen, and adjusts the screen size
         /// </summary>
         private void Disable_Login_Menu()
         {

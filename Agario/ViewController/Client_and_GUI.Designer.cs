@@ -54,11 +54,8 @@ namespace ViewController
             this.player_name_box.Name = "Player_Name_Textbox";
             this.player_name_box.Size = new System.Drawing.Size(100, 20);
             this.player_name_box.TabIndex = 2;
-
-            this.player_name_box.Text = "Player One"; // TODO: Remove this and Enabled (below) to allow user input.
-            this.player_name_box.Enabled = false;
-            //this.player_name_box.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.player_name_box);
-
+            this.player_name_box.Text = "Player One";
+            this.player_name_box.Enabled = true;
 
             //Label for Player Name text
             this.player_name_label = new Label();
@@ -69,19 +66,15 @@ namespace ViewController
             this.player_name_label.Size = new System.Drawing.Size(79, 29);
             this.player_name_label.TabIndex = 3;
             this.player_name_label.Text = "Player Name:";
-
-
+            
             //Input Box for Server
             this.server_address_box = new TextBox();
             this.server_address_box.Location = new Point(300, 206);
             this.server_address_box.Name = "Server_Address_Textbox";
             this.server_address_box.Size = new System.Drawing.Size(100, 20);
             this.server_address_box.TabIndex = 2;
-
-            this.server_address_box.Text = "localhost"; //TODO: Remove this and Enabled (below) to allow user input.
-            this.server_address_box.Enabled = false;
-            //this.server_address_box.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.server_address_box);
-
+            this.server_address_box.Text = "localhost"; 
+            this.server_address_box.Enabled = true;
 
             //Label for Server text
             this.server_label = new Label();

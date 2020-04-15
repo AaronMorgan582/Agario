@@ -29,8 +29,19 @@ namespace Model
         [JsonProperty]
         private float Mass;
 
-        private double radius;
+        private float radius;
 
+        /// <summary>
+        /// Constructor for the Circle class to be created with the 
+        /// information from the server
+        /// </summary>
+        /// <param name="loc">an x,y coordinate for Circle's location</param>
+        /// <param name="argb_color">an int representing the Circle's color</param>
+        /// <param name="id">an int representing the Circle's id</param>
+        /// <param name="belongs_to">an int representing the Circle's parent to be used for split function</param>
+        /// <param name="type">an object_type of food, player, heartbeat, or admin</param>
+        /// <param name="Name">a string representing a player's name</param>
+        /// <param name="Mass">a float representing the area of a circle</param>
         public Circle(PointF loc, int argb_color, int id, int belongs_to, object_type type, string Name, float Mass)
         {
             this.loc = loc;
@@ -41,7 +52,7 @@ namespace Model
             this.Name = Name;
             this.Mass = Mass;
 
-            radius = Math.Sqrt(Mass / (Math.PI));
+            radius = (float) Math.Sqrt(Mass / (Math.PI));
         }
 
         public static void Main(string[] args)
@@ -53,7 +64,9 @@ namespace Model
             Console.WriteLine(testCircle);
         }
 
-        public double Radius { get => radius; set => radius = value; }
+        #region Getters/Setters for the Circle class
+
+        public float Radius { get => radius; set => radius = value; }
 
         public int CircleColor { get => argb_color; }
 
@@ -68,5 +81,7 @@ namespace Model
         public float GetMass { get => this.Mass; set => this.Mass = value; }
 
         public int BelongsTo { get => this.belongs_to; }
+
+        #endregion
     }
 }
