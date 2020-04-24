@@ -64,7 +64,7 @@ namespace ViewController
             this.player_name_box.Name = "Player_Name_Textbox";
             this.player_name_box.Size = new System.Drawing.Size(100, 20);
             this.player_name_box.TabIndex = 2;
-            this.player_name_box.Text = "Player One";
+            this.player_name_box.Text = "PlayerOne";
             this.player_name_box.Enabled = true;
 
             //Label for Player Name text

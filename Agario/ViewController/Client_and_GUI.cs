@@ -22,12 +22,13 @@ using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
 using System.Diagnostics;
+using Database;
 
 namespace ViewController
 {
     public partial class Client_and_GUI : Form
     {
-        
+
         private Preserved_Socket_State server;
         private string player_name;
         private string server_name;
@@ -49,8 +50,17 @@ namespace ViewController
 
         private bool can_split = false;
 
+        private AgarioDatabase database;
+        Stopwatch game_timer;
+        long elapsed_time;
+        private int rank;
+
         public Client_and_GUI(ILogger logger)
         {
+            rank = 0;
+            game_timer = new Stopwatch();
+            elapsed_time = 0;
+            database = new AgarioDatabase();
             this.logger = logger;
             game_world = new World(logger);
 
@@ -65,6 +75,7 @@ namespace ViewController
         /// <param name="e"></param>
         private void Connect_To_Server(object o, EventArgs e)
         {
+
             if (this.server != null && this.server.socket.Connected)
             {
                 logger.LogInformation("Shutting down the connection");
@@ -91,6 +102,7 @@ namespace ViewController
         /// <param name="obj"></param>
         private void Contact_Established(Preserved_Socket_State obj)
         {
+            game_timer.Start();
             logger.LogInformation("Contact with Server established!");
             obj.on_data_received_handler = Get_Player_Circle;
             Networking.Send(obj.socket, player_name);
@@ -128,7 +140,7 @@ namespace ViewController
                 if (!game_world.Contains(player_id))
                 {
                     game_world.Add(player_id, player_circle);
-                }  
+                }
             }
 
             Networking.await_more_data(obj);
@@ -186,16 +198,23 @@ namespace ViewController
             {
                 Networking.await_more_data(obj);
             }
-            catch(SocketException e)
+            catch (SocketException e)
             {
                 // If a player has died, stop drawing the game scene and display game over screen
                 logger.LogInformation($"{player_circle.GetName} has been killed.");
                 connected = false;
                 isDead = true;
+                game_timer.Stop();
+                elapsed_time = game_timer.ElapsedMilliseconds;
+                
+                // We are converting the time in milliseconds into a string of hour:min:seconds format to be added into the database
+                TimeSpan converted_time = TimeSpan.FromMilliseconds(elapsed_time);
+                string time_played = string.Format("{0:D2}h:{1:D2}m:{2:D2}s:{3:D3}ms", converted_time.Hours, converted_time.Minutes, converted_time.Seconds, converted_time.Milliseconds);
+                database.Insert_Player_Data(player_name, player_circle.GetMass, rank + 1, time_played);
             }
 
             // If the user wishes to split, send the coordinates for split
-            if(can_split)
+            if (can_split)
             {
                 float destination_X = player_circle.Location.X + 100;
                 float destination_Y = player_circle.Location.Y + 100;
@@ -204,7 +223,7 @@ namespace ViewController
             }
 
             obj.on_data_received_handler = Get_World_Information;
-            
+
         }
 
         /// <summary>
@@ -253,10 +272,11 @@ namespace ViewController
                             e.Graphics.DrawString($"{player_circle.GetName}", new Font("Times New Roman", 12), text_brush, player_point);
                             location_changed = false;
                         }
-;                    }
+;
+                    }
                 }
             }
-            else if(isDead)
+            else if (isDead)
             {
                 Display_Game_Over_Screen(e);
             }
@@ -269,7 +289,7 @@ namespace ViewController
         /// <param name="e"></param>
         private void Space_Down(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Space)
+            if (e.KeyCode == Keys.Space)
             {
                 if (player_circle.GetMass > 10)
                 {
@@ -312,7 +332,7 @@ namespace ViewController
             Width = 700;
             Height = 450;
             CenterToScreen();
-            
+
             player_name_label.Show();
             player_name_box.Show();
             title_label.Show();
@@ -338,7 +358,7 @@ namespace ViewController
 
             this.Width = 1600;
             this.Height = 900;
-            this.CenterToScreen();          
+            this.CenterToScreen();
         }
     }
 }
