@@ -60,7 +60,7 @@ namespace ViewController
             rank = 0;
             game_timer = new Stopwatch();
             elapsed_time = 0;
-            database = new AgarioDatabase();
+            database = new Database.AgarioDatabase();
             this.logger = logger;
             game_world = new World(logger);
 

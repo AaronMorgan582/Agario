@@ -22,14 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Database\Database.csproj" />
     <ProjectReference Include="..\FileLogger\FileLogger.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Database">
-      <HintPath>..\..\..\assignment-9-web-server-and-sql-quaranteens\SQL and a Web Server\Database\bin\Debug\netcoreapp3.1\Database.dll</HintPath>
-    </Reference>
     <Reference Include="FileLogger">
       <HintPath>..\..\..\assignment-seven-logging-and-networking-anti-social-social-club\Networking_and_Logging\FileLogger\obj\Debug\netcoreapp3.1\FileLogger.dll</HintPath>
     </Reference>
