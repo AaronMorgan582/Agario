@@ -1,19 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿/// <summary>
+/// 
+/// Author:    Aaron Morgan and Xavier Davis
+/// Partner:   Xavier Davis and Aaron Morgan
+/// Date:      4/24/2020
+/// Course:    CS 3500, University of Utah, School of Computing 
+/// Copyright: CS 3500, Aaron Morgan and Xavier Davis
+/// 
+/// We, Aaron Morgan and Xavier Davis, certify that we wrote this code from scratch and did not copy it in part
+/// or in whole from another source, with the exception of the Configuration code for the User Secrets, which was primarily 
+/// provided by Prof. Jim de St. Germain for the University of Utah's Computing CS 3500 class, during the Spring 2020 term.
+/// 
+/// </summary>
+using System;
 using System.Data.SqlClient;
 using System.Data;
 using Microsoft.Extensions.Configuration;
 
 namespace Database
 {
+    /// <summary>
+    /// This class handles the communication to the SQL Database that is reserved for
+    /// the Agario game.
+    /// </summary>
     public class AgarioDatabase
     {
 
         /// <summary>
         /// The information necessary for the program to connect to the Database
         /// </summary>
-        public readonly string connection_string;
+        private readonly string connection_string;
 
         /// <summary>
         /// Upon construction of this static class, build the connection string
@@ -36,7 +51,6 @@ namespace Database
             }.ConnectionString;
         }
 
-
         /// <summary>
         ///  Test several connections and print the output to the console
         /// </summary>
@@ -44,26 +58,47 @@ namespace Database
         public static void Main(string[] args)
         {
         }
+
+        /// <summary>
+        /// This method retrieves the data that is found in the HighScores table.
+        /// </summary>
+        /// <returns>A DataSet, containing the data from the HighScores table</returns>
         public DataSet Get_HighScores()
         {
             return Build_DataSet(connection_string, "HighScores", "LargestMass");
         }
 
         /// <summary>
-        /// Getter for the TimeInFirst Data
+        /// This method retrieves the data that is found in the TimeInFirst table.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A DataSet, containing the data from the TimeInFirst table</returns>
         public DataSet Get_First_Times()
         {
             return Build_DataSet(connection_string, "TimeInFirst", "TotalTime");
         }
 
+        /// <summary>
+        /// This method retrieves the data that is found in the given Player table.
+        /// The table data retrieved is dependent on which name is passed into the parameter.
+        /// </summary>
+        /// <param name="player_name">The name of the player</param>
+        /// <returns>A DataSet, containing the data from the given Player table.</returns>
         public DataSet Get_Player_Data(string player_name)
         {
             return Build_DataSet(connection_string, $"{player_name}Data", "Mass");
         }
 
-        public DataSet Insert_HighScore_Data(string player_name, float mass, int rank, string time_alive)
+        /// <summary>
+        /// This write the SQL command to insert the given player data into the
+        /// HighScores table. If the player already exists in the table, it will check
+        /// to see the largest values recorded in the player's table, then
+        /// set the HighScores values (for that player) to those values.
+        /// </summary>
+        /// <param name="player_name">The player name</param>
+        /// <param name="mass">The mass of the player's circle</param>
+        /// <param name="rank">The rank the player achieved</param>
+        /// <param name="time_alive">The time in h:m:s:ms format</param>
+        public void Insert_HighScore_Data(string player_name, float mass, int rank, string time_alive)
         {
             string table_name = player_name + "Data";
             DataSet my_data_set = new DataSet();
@@ -80,12 +115,20 @@ namespace Database
                                                 END
                                             ELSE
                                                 BEGIN
-                                                DECLARE @HighestRecordedScore float;
-                                                SELECT @HighestRecordedScore = Max(Mass) FROM {table_name}
-                                                UPDATE HighScores SET LargestMass = @HighestRecordedScore WHERE PlayerName = '{player_name}'
-                                                UPDATE HighScores SET LongestTimeAlive = '{time_alive}' WHERE PlayerName = '{player_name}'
-                                                UPDATE HighScores SET HighestRank = {rank} WHERE PlayerName = '{player_name}'
-                                                END";
+                                                DECLARE @HighestRecordedMass float;
+                                                DECLARE @HighestRecordedTimeAlive varchar(50);
+                                                DECLARE @HighestRecordedRank int;
+
+                                                SELECT @HighestRecordedMass = MAX(Mass) FROM {table_name}
+                                                UPDATE HighScores SET LargestMass = @HighestRecordedMass WHERE PlayerName = '{player_name}'
+
+                                                SELECT @HighestRecordedTimeAlive = MAX(TimePlayed) FROM {table_name}
+                                                UPDATE HighScores SET LongestTimeAlive = @HighestRecordedTimeAlive WHERE PlayerName = '{player_name}'
+
+                                                SELECT @HighestRecordedRank = MIN(Rank) FROM {table_name}
+                                                UPDATE HighScores SET HighestRank = @HighestRecordedRank WHERE PlayerName = '{player_name}'
+
+                                                END;";
                     SqlDataAdapter my_sql_data_adapter = new SqlDataAdapter(sql_command, con);
 
                     my_sql_data_adapter.Fill(my_data_set, $"{table_name}");
@@ -95,12 +138,18 @@ namespace Database
             {
                 Console.WriteLine($"Error in SQL connection:\n   - {exception.Message}");
             }
-
-            return my_data_set;
         }
 
-
-        public DataSet Insert_Player_Data(string player_name, float mass, int rank, string time_alive)
+        /// <summary>
+        /// This write the SQL command to insert the given player data into the
+        /// the player's own table. If the player doesn't exist in the database yet,
+        /// a new table will be created.
+        /// </summary>
+        /// <param name="player_name">The player name</param>
+        /// <param name="mass">The mass of the player's circle</param>
+        /// <param name="rank">The rank the player achieved</param>
+        /// <param name="time_alive">The time in h:m:s:ms format</param>
+        public void Insert_Player_Data(string player_name, float mass, int rank, string time_alive)
         {
             string table_name = player_name + "Data";
             DataSet my_data_set = new DataSet();
@@ -139,10 +188,17 @@ namespace Database
             {
                 Console.WriteLine($"Error in SQL connection:\n   - {exception.Message}");
             }
-
-            return my_data_set;
         }
 
+        /// <summary>
+        /// This private helper method is used to construct the DataSet that
+        /// contains the data that is retrieved from a given table, and will sort
+        /// it in descending order based on the given column name.
+        /// </summary>
+        /// <param name="connection_string">The connection string that is used to communicate with the SQL database</param>
+        /// <param name="table_name">The table to be retrieved from the database</param>
+        /// <param name="column_name">The column name to be sorted by.</param>
+        /// <returns></returns>
         private static DataSet Build_DataSet(string connection_string, string table_name, string column_name)
         {
             DataSet my_data_set = new DataSet();
