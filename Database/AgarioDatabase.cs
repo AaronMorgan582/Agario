@@ -43,47 +43,7 @@ namespace Database
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            AgarioDatabase testDatabase = new AgarioDatabase();
-            Console.WriteLine(testDatabase.connection_string);
-
-            DataSet test_set = testDatabase.Get_HighScores();
-            foreach (DataRow my_data_row in test_set.Tables["HighScores"].Rows)
-            {
-                foreach(DataColumn my_data_column in test_set.Tables["HighScores"].Columns)
-                {
-                    Console.WriteLine(my_data_row[my_data_column]);
-                }
-            }
         }
-
-        private void InsertPatron()
-        {
-
-            Console.WriteLine("What phone numbers exist?");
-
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connection_string))
-                {
-                    con.Open();
-
-                    using (SqlCommand command = new SqlCommand("INSERT INTO Patrons (Name) values ('Aaron')", con))
-                    using (SqlDataReader reader = command.ExecuteReader())
-
-                        while (reader.Read())
-                        {
-                            {
-                                Console.WriteLine($"{reader["Name"].ToString().Trim()} ({reader["CardNum"]}) - {reader["Phone"]}");
-                            }
-                        }
-                }
-            }
-            catch (SqlException exception)
-            {
-                Console.WriteLine($"Error in SQL connection:\n   - {exception.Message}");
-            }
-        }
-
         public DataSet Get_HighScores()
         {
             return Build_DataSet(connection_string, "HighScores", "LargestMass");
@@ -103,11 +63,48 @@ namespace Database
             return Build_DataSet(connection_string, $"{player_name}Data", "Mass");
         }
 
-        public DataSet Insert_Player_Data(string player_name, float mass, int rank, string time)
+        public DataSet Insert_HighScore_Data(string player_name, float mass, int rank, string time_alive)
         {
             string table_name = player_name + "Data";
             DataSet my_data_set = new DataSet();
-            Console.WriteLine(time);
+            Console.WriteLine(time_alive);
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connection_string))
+                {
+                    con.Open();
+                    string sql_command = @$"IF NOT EXISTS (SELECT*FROM HighScores WHERE PlayerName = '{player_name}')
+                                                BEGIN
+                                                INSERT INTO HighScores (PlayerName, LargestMass, LongestTimeAlive, HighestRank)
+                                                VALUES ('{player_name}', {mass}, '{time_alive}', {rank})
+                                                END
+                                            ELSE
+                                                BEGIN
+                                                DECLARE @HighestRecordedScore float;
+                                                SELECT @HighestRecordedScore = Max(Mass) FROM {table_name}
+                                                UPDATE HighScores SET LargestMass = @HighestRecordedScore WHERE PlayerName = '{player_name}'
+                                                UPDATE HighScores SET LongestTimeAlive = '{time_alive}' WHERE PlayerName = '{player_name}'
+                                                UPDATE HighScores SET HighestRank = {rank} WHERE PlayerName = '{player_name}'
+                                                END";
+                    SqlDataAdapter my_sql_data_adapter = new SqlDataAdapter(sql_command, con);
+
+                    my_sql_data_adapter.Fill(my_data_set, $"{table_name}");
+                }
+            }
+            catch (SqlException exception)
+            {
+                Console.WriteLine($"Error in SQL connection:\n   - {exception.Message}");
+            }
+
+            return my_data_set;
+        }
+
+
+        public DataSet Insert_Player_Data(string player_name, float mass, int rank, string time_alive)
+        {
+            string table_name = player_name + "Data";
+            DataSet my_data_set = new DataSet();
+            Console.WriteLine(time_alive);
             try
             {
                 using (SqlConnection con = new SqlConnection(connection_string))
@@ -124,13 +121,13 @@ namespace Database
                                                 )   
                                                 INSERT INTO {table_name} (PlayerName, Mass, Rank, TimePlayed)
                                                 VALUES
-                                                ('{player_name}', {mass}, {rank}, '{time}')
+                                                ('{player_name}', {mass}, {rank}, '{time_alive}')
                                                 END
                                             ELSE
                                                 BEGIN
                                                 INSERT INTO {table_name} (PlayerName, Mass, Rank, TimePlayed)
                                                 VALUES
-                                                ('{player_name}', {mass}, {rank}, '{time}')
+                                                ('{player_name}', {mass}, {rank}, '{time_alive}')
                                                 END;
                                                 ";
                     SqlDataAdapter my_sql_data_adapter = new SqlDataAdapter(sql_command, con);

@@ -211,6 +211,7 @@ namespace ViewController
                 TimeSpan converted_time = TimeSpan.FromMilliseconds(elapsed_time);
                 string time_played = string.Format("{0:D2}h:{1:D2}m:{2:D2}s:{3:D3}ms", converted_time.Hours, converted_time.Minutes, converted_time.Seconds, converted_time.Milliseconds);
                 database.Insert_Player_Data(player_name, player_circle.GetMass, rank + 1, time_played);
+                database.Insert_HighScore_Data(player_name, player_circle.GetMass, rank + 1, time_played);
             }
 
             // If the user wishes to split, send the coordinates for split
